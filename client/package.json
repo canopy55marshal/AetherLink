@@ -9,6 +9,7 @@
     "install-missing": "node ./scripts/install-missing-deps.js",
     "lint": "expo lint",
     "start": "expo start --web --clear",
+    "build:web": "npx expo export:web",
     "test": "jest --watchAll"
   },
   "jest": {
