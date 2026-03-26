@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherLink 部署状态</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .status {
+            display: inline-block;
+            padding: 8px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .section h2 {
+            color: #495057;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+        }
+        .test-item.pending {
+            border-left-color: #ffc107;
+        }
+        .test-item.error {
+            border-left-color: #dc3545;
+        }
+        .test-name {
+            font-weight: 500;
+            color: #333;
+        }
+        .test-status {
+            font-size: 14px;
+            color: #666;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 10px 10px 0;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .instructions {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+        .instructions h3 {
+            color: #0056b3;
+            margin-bottom: 10px;
+        }
+        .instructions ul {
+            margin-left: 20px;
+            color: #333;
+        }
+        .instructions li {
+            margin: 8px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AetherLink 部署状态</h1>
+            <span class="status">✅ 部署成功</span>
+        </div>
+
+        <div class="section">
+            <h2>📊 系统测试</h2>
+            <div id="test-results"></div>
+        </div>
+
+        <div class="section">
+            <h2>🌐 访问方式</h2>
+            <a href="https://canopy55marshal.github.io/AetherLink/" class="btn" target="_blank">访问主应用</a>
+            <a href="https://canopy55marshal.github.io/AetherLink/" class="btn btn-secondary" onclick="copyUrl(event)">复制链接</a>
+        </div>
+
+        <div class="instructions">
+            <h3>📝 客户访问说明</h3>
+            <ul>
+                <li><strong>PC端：</strong>直接点击"访问主应用"按钮，或在浏览器打开链接</li>
+                <li><strong>手机端：</strong>复制链接到手机浏览器打开</li>
+                <li><strong>无需安装：</strong>纯Web应用，即开即用</li>
+                <li><strong>支持浏览器：</strong>Chrome、Edge、Firefox、Safari</li>
+                <li><strong>首次访问：</strong>可能稍慢（需要加载JavaScript，约2.8MB）</li>
+            </ul>
+        </div>
+
+        <div class="instructions">
+            <h3>⚠️ 功能说明</h3>
+            <ul>
+                <li>✅ 支持所有前端交互功能（浏览、导航、表单等）</li>
+                <li>⚠️ 后端API需要单独部署（当前未配置）</li>
+                <li>⚠️ 部分功能可能显示Demo数据</li>
+                <li>⚠️ 需要启用JavaScript才能使用</li>
+            </ul>
+        </div>
+
+        <div class="instructions">
+            <h3>🔧 如遇问题</h3>
+            <ul>
+                <li>如果看到白屏：等待JavaScript加载完成（首次可能需要10-30秒）</li>
+                <li>如果显示错误：清除浏览器缓存后重试</li>
+                <li>如果JavaScript未加载：检查网络连接</li>
+                <li>如需帮助：联系技术支持</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>部署时间：<span id="deploy-time"></span></p>
+            <p>访问地址：<strong>https://canopy55marshal.github.io/AetherLink/</strong></p>
+        </div>
+    </div>
+
+    <script>
+        const deployTime = new Date().toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZoneName: 'short'
+        });
+        document.getElementById('deploy-time').textContent = deployTime;
+
+        async function runTests() {
+            const results = document.getElementById('test-results');
+            const tests = [
+                { name: 'HTML页面', url: 'https://canopy55marshal.github.io/AetherLink/' },
+                { name: 'JavaScript文件', url: 'https://canopy55marshal.github.io/AetherLink/_expo/static/js/web/entry-f6799dad4cfa956ce6b89ebe83439743.js' },
+                { name: '图标文件', url: 'https://canopy55marshal.github.io/AetherLink/favicon.ico' },
+                { name: 'GitHub Pages服务', url: 'https://github.com/canopy55marshal/AetherLink' }
+            ];
+
+            let html = '';
+            for (const test of tests) {
+                html += `<div class="test-item pending">
+                    <span class="test-name">${test.name}</span>
+                    <span class="test-status">测试中...</span>
+                </div>`;
+            }
+            results.innerHTML = html;
+
+            const items = results.querySelectorAll('.test-item');
+            for (let i = 0; i < tests.length; i++) {
+                const test = tests[i];
+                const item = items[i];
+                const statusSpan = item.querySelector('.test-status');
+
+                try {
+                    const start = Date.now();
+                    const response = await fetch(test.url, { method: 'HEAD' });
+                    const time = Date.now() - start;
+
+                    if (response.ok) {
+                        item.classList.remove('pending');
+                        item.classList.add('pass');
+                        statusSpan.innerHTML = `✅ ${response.status} (${time}ms)`;
+                    } else {
+                        item.classList.remove('pending');
+                        item.classList.add('error');
+                        statusSpan.innerHTML = `❌ ${response.status}`;
+                    }
+                } catch (error) {
+                    item.classList.remove('pending');
+                    item.classList.add('error');
+                    statusSpan.innerHTML = `❌ 访问失败`;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+        }
+
+        function copyUrl(e) {
+            e.preventDefault();
+            const url = 'https://canopy55marshal.github.io/AetherLink/';
+            navigator.clipboard.writeText(url).then(() => {
+                alert('链接已复制到剪贴板！');
+            }).catch(() => {
+                prompt('请复制以下链接：', url);
+            });
+        }
+
+        runTests();
+    </script>
+</body>
+</html>
