@@ -22,21 +22,23 @@ Coze部署分为两个阶段：
 
 ## 解决方案
 
-### 方案一：暂时禁用Android构建（当前采用）
+### 方案一：完全移除build_app_dir配置（当前采用）
 
-修改 `.coze` 配置文件，注释掉 `build_app_dir`：
+修改 `.coze` 配置文件，完全删除 `build_app_dir` 配置行：
 
 ```toml
 [deploy]
 build = ["bash", ".cozeproj/scripts/prod_build.sh"]
 run = ["bash", ".cozeproj/scripts/prod_run.sh"]
-# 暂时禁用Android构建，先确保Runtime部署成功
-# build_app_dir = "./client"
+# 完全删除 build_app_dir 配置
 ```
+
+**注意**：注释 `build_app_dir` 可能不够，需要完全删除这一行。
 
 **优点**：
 - 可以快速部署Runtime（后端服务）
 - 验证整体配置的正确性
+- 完全避免Android构建阶段
 
 **缺点**：
 - 无法生成Android APK
@@ -79,14 +81,9 @@ fi
 ```
 
 #### 步骤4：恢复.coze配置
-取消注释 `.coze` 中的 `build_app_dir`：
+**注意**：在Coze平台中，不建议恢复 `build_app_dir` 配置，因为Coze的Android构建与EAS不完全兼容。
 
-```toml
-[deploy]
-build = ["bash", ".cozeproj/scripts/prod_build.sh"]
-run = ["bash", ".cozeproj/scripts/prod_run.sh"]
-build_app_dir = "./client"
-```
+建议使用GitHub Actions或Bitrise等其他CI/CD服务来构建Android APK。
 
 ### 方案三：使用其他CI/CD服务（推荐）
 
@@ -111,12 +108,18 @@ build_app_dir = "./client"
 ✅ 所有配置文件正确
 ❌ Android构建失败（平台兼容性问题）
 
+**重要提示**：Coze平台可能与Expo EAS构建服务不完全兼容，建议：
+- 在Coze平台部署Runtime服务（后端）
+- 使用GitHub Actions、Bitrise等其他CI/CD服务构建Android APK
+- 或者直接使用Expo官方的EAS构建服务
+
 ## 建议行动
 
-1. **短期方案**：使用方案一，优先部署Runtime服务
+1. **短期方案**：使用方案一，优先部署Runtime服务（已实施）
 2. **长期方案**：
    - 评估是否需要在Coze平台构建Android
-   - 考虑使用EAS云端构建或GitHub Actions
+   - 考虑使用GitHub Actions构建Android APK
+   - 或使用EAS云端构建直接构建（不通过Coze）
    - 分离Runtime和Android构建流程
 
 ## 技术细节
@@ -171,4 +174,27 @@ build_app_dir = "./client"
 - 2026-03-27: 初次遇到Android构建问题（error code: 1002）
 - 2026-03-27: 尝试添加EAS配置，失败
 - 2026-03-27: 尝试执行Expo预构建，失败
-- 2026-03-27: 暂时禁用Android构建，优先部署Runtime
+- 2026-03-27: 尝试注释build_app_dir，仍然失败
+- 2026-03-27: **完全删除build_app_dir配置，确保禁用Android构建**
+- 2026-03-27: 更新文档，说明Coze平台Android构建的限制
+
+## 关键发现
+
+1. **注释不够**：仅仅注释 `build_app_dir` 配置可能不足以禁用Android构建，需要完全删除这一行。
+
+2. **Coze平台特性**：Coze平台可能在代码打包阶段就检测到client目录，并决定构建Android，即使没有明确配置。
+
+3. **平台兼容性**：Coze平台的Android构建流程可能与Expo EAS服务不完全兼容，建议使用其他CI/CD服务构建Android应用。
+
+## 推荐架构
+
+```
+Runtime部署（Coze平台）
+├── Express后端服务 ✅
+└── API接口 ✅
+
+Android构建（其他CI/CD服务）
+├── GitHub Actions（推荐）
+├── Bitrise
+└── EAS直接构建（不通过Coze）
+```
