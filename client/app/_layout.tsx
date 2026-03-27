@@ -30,12 +30,14 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const hideSplash = async () => {
       try {
-        // 等待导航就绪且有实际路由分段后，再隐藏启动画面
+        // 策略1：等待导航就绪且有实际路由分段后，再隐藏启动画面
         if (rootState?.key && segments.length > 0 && !isLoading) {
+          console.log('[AuthGuard] Conditions met, hiding splash screen...');
           // 延迟200ms确保UI渲染完成
           const timer = setTimeout(async () => {
             try {
               await SplashScreen.hideAsync();
+              console.log('[AuthGuard] Splash screen hidden successfully');
             } catch (error) {
               console.warn('Failed to hide splash screen:', error);
             }
@@ -54,18 +56,37 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     };
 
     hideSplash();
+
+    // 策略2：超时保护 - 如果8秒后还没隐藏，强制隐藏
+    const forceHideTimer = setTimeout(async () => {
+      console.warn('[AuthGuard] Splash screen timeout (8s), force hiding...');
+      try {
+        await SplashScreen.hideAsync();
+        console.log('[AuthGuard] Splash screen force hidden');
+      } catch (error) {
+        console.error('Failed to force hide splash screen:', error);
+      }
+    }, 8000);
+
+    return () => {
+      clearTimeout(forceHideTimer);
+    };
   }, [rootState?.key, segments.length, isLoading]);
 
   useEffect(() => {
+    console.log('[AuthGuard] Navigation effect - rootState:', !!rootState?.key, 'isLoading:', isLoading, 'isAuthenticated:', isAuthenticated, 'segments:', segments);
+
     if (!rootState?.key || isLoading) return;
 
     const inAuthRoute = segments[0] === 'login' || segments[0] === 'register';
 
     if (!isAuthenticated && !inAuthRoute) {
+      console.log('[AuthGuard] Not authenticated, redirecting to login');
       router.replace('/login');
     }
 
     if (isAuthenticated && inAuthRoute) {
+      console.log('[AuthGuard] Already authenticated, redirecting to home');
       router.replace('/');
     }
   }, [rootState?.key, isAuthenticated, isLoading, segments, router]);

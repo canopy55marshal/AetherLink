@@ -38,21 +38,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // 初始化：从本地存储加载token和用户信息
   useEffect(() => {
     loadAuthData();
+
+    // 添加超时机制，5秒后强制停止加载
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+      console.warn('[AuthContext] Auth loading timeout (5s), forcing loading to false');
+    }, 5000);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const loadAuthData = async () => {
     try {
+      console.log('[AuthContext] Loading auth data from AsyncStorage...');
       const storedToken = await AsyncStorage.getItem(TOKEN_KEY);
       const storedUser = await AsyncStorage.getItem(USER_KEY);
+
+      console.log('[AuthContext] Stored token:', storedToken ? 'exists' : 'none');
+      console.log('[AuthContext] Stored user:', storedUser ? 'exists' : 'none');
 
       if (storedToken && storedUser) {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error('Failed to load auth data:', error);
+      console.error('[AuthContext] Failed to load auth data:', error);
     } finally {
       setIsLoading(false);
+      console.log('[AuthContext] Auth loading completed, isLoading = false');
     }
   };
 
