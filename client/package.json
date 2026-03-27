@@ -11,7 +11,9 @@
     "start": "expo start --web --clear",
     "build:web": "npx expo export",
     "build:android": "eas build --platform android --profile preview",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "jest": {
     "preset": "jest-expo"
@@ -96,5 +98,6 @@
     "tsx": "^4.21.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.1"
-  }
+  },
+  "version": "1.0.0"
 }

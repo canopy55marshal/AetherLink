@@ -9,3 +9,8 @@ expo-env.d.ts
 .DS_Store
 logs/
 *.tsbuildinfo
+
+# Expo Prebuild生成的原生项目
+client/android/
+client/ios/
+

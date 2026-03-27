@@ -26,6 +26,12 @@ info "正在检查依赖命令是否存在..."
 # 检查核心命令
 check_command "pnpm"
 check_command "npm"
+check_command "node"
+
+# 设置Node版本（如果存在）
+if command -v nvm &> /dev/null; then
+  nvm use 20 || true
+fi
 
 # ==================== 安装 Node 依赖 ====================
 info "==================== 安装 Node 依赖 ===================="
@@ -43,5 +49,31 @@ info "==================== dist打包 ===================="
 info "开始执行：pnpm run build (server)"
 (pushd "$ROOT_DIR/server" > /dev/null && pnpm run build; popd > /dev/null) || error "dist打包失败"
 info "==================== dist打包完成！====================\n"
+
+info "==================== Android预构建 ===================="
+info "为Coze Android构建准备Android原生项目..."
+if [ -d "$ROOT_DIR/client" ]; then
+  info "进入client目录"
+  cd "$ROOT_DIR/client"
+
+  # 检查Android原生目录
+  if [ -d "android" ]; then
+    info "Android原生目录已存在，清理并重新生成..."
+    rm -rf android
+  fi
+
+  # 使用Expo预构建生成Android项目
+  info "执行Expo预构建（npx expo prebuild --platform android --clean）..."
+  if npx expo prebuild --platform android --clean; then
+    info "✅ Android原生项目生成成功"
+  else
+    warn "⚠️  Android预构建失败，但继续进行（Coze可能使用自己的构建流程）"
+  fi
+
+  cd "$ROOT_DIR"
+else
+  warn "未找到client目录，跳过Android预构建"
+fi
+info "==================== Android预构建完成！====================\n"
 
 info "下一步：执行 ./prod_run.sh 启动服务"
