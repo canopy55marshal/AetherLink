@@ -30,19 +30,31 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const hideSplash = async () => {
       try {
-        // 等待认证加载完成
-        if (!isLoading) {
-          await SplashScreen.hideAsync();
+        // 等待导航就绪且有实际路由分段后，再隐藏启动画面
+        if (rootState?.key && segments.length > 0 && !isLoading) {
+          // 延迟200ms确保UI渲染完成
+          const timer = setTimeout(async () => {
+            try {
+              await SplashScreen.hideAsync();
+            } catch (error) {
+              console.warn('Failed to hide splash screen:', error);
+            }
+          }, 200);
+          return () => clearTimeout(timer);
         }
       } catch (error) {
         console.error('Error hiding splash screen:', error);
         // 即使出错也尝试隐藏
-        await SplashScreen.hideAsync();
+        try {
+          await SplashScreen.hideAsync();
+        } catch (err) {
+          console.warn('Failed to hide splash screen on error:', err);
+        }
       }
     };
 
     hideSplash();
-  }, [isLoading]);
+  }, [rootState?.key, segments.length, isLoading]);
 
   useEffect(() => {
     if (!rootState?.key || isLoading) return;
