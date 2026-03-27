@@ -186,9 +186,16 @@ export default function HomeScreen() {
 
       // 获取任务列表
       const response = await fetch(`${EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/tasks`);
+
+      // 检查响应状态
+      if (!response.ok) {
+        console.warn(`Tasks API returned ${response.status}, using empty tasks list`);
+        return;
+      }
+
       const result = await response.json();
 
-      if (result.data) {
+      if (result.data && Array.isArray(result.data)) {
         // 获取每个任务的进度
         const tasksWithProgress = await Promise.all(
           result.data.slice(0, 3).map(async (task: any) => {
@@ -196,16 +203,24 @@ export default function HomeScreen() {
               const progressResponse = await fetch(
                 `${EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/tasks/${task.id}/progress?userId=${user.id}`
               );
-              const progressResult = await progressResponse.json();
+
+              let progressPercent = 0;
+              let completedSteps = 0;
+
+              if (progressResponse.ok) {
+                const progressResult = await progressResponse.json();
+                progressPercent = progressResult.data?.progressPercent || 0;
+                completedSteps = progressResult.data?.completedSteps || 0;
+              }
 
               return {
                 id: task.id,
                 title: task.title,
                 category: task.category,
-                progress: progressResult.data?.progressPercent || 0,
+                progress: progressPercent,
                 totalSteps: task.total_steps,
-                currentStep: progressResult.data?.completedSteps || 0,
-                status: progressResult.data?.progressPercent === 100 ? 'completed' : 'in_progress',
+                currentStep: completedSteps,
+                status: progressPercent === 100 ? 'completed' : 'in_progress',
                 estimatedTime: task.estimated_time,
                 tags: task.metadata?.tags || [],
               };
@@ -216,10 +231,10 @@ export default function HomeScreen() {
                 title: task.title,
                 category: task.category,
                 progress: 0,
-                totalSteps: task.total_steps,
+                totalSteps: task.total_steps || 10,
                 currentStep: 0,
                 status: 'pending' as const,
-                estimatedTime: task.estimated_time,
+                estimatedTime: task.estimated_time || 30,
                 tags: task.metadata?.tags || [],
               };
             }
@@ -230,6 +245,7 @@ export default function HomeScreen() {
       }
     } catch (error) {
       console.error('Error fetching tasks:', error);
+      // 出错时不设置tasks，保持空状态
     }
   }, [user]);
 
