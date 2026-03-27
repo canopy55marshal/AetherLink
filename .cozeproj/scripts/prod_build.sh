@@ -50,30 +50,40 @@ info "开始执行：pnpm run build (server)"
 (pushd "$ROOT_DIR/server" > /dev/null && pnpm run build; popd > /dev/null) || error "dist打包失败"
 info "==================== dist打包完成！====================\n"
 
-info "==================== Android预构建 ===================="
-info "为Coze Android构建准备Android原生项目..."
+info "==================== Android构建准备 ===================="
+info "为Coze Android构建准备配置..."
 if [ -d "$ROOT_DIR/client" ]; then
-  info "进入client目录"
+  info "验证EAS配置..."
   cd "$ROOT_DIR/client"
 
-  # 检查Android原生目录
-  if [ -d "android" ]; then
-    info "Android原生目录已存在，清理并重新生成..."
-    rm -rf android
+  # 检查eas.json是否存在
+  if [ -f "eas.json" ]; then
+    info "✅ EAS配置文件已找到 (eas.json)"
+    cat eas.json | head -20
+  else
+    warn "⚠️  未找到eas.json，Android构建可能失败"
   fi
 
-  # 使用Expo预构建生成Android项目
-  info "执行Expo预构建（npx expo prebuild --platform android --clean）..."
-  if npx expo prebuild --platform android --clean; then
-    info "✅ Android原生项目生成成功"
+  # 检查eas-cli是否可用
+  if npx eas --version &> /dev/null; then
+    EAS_VERSION=$(npx eas --version)
+    info "✅ EAS CLI已安装 (版本: $EAS_VERSION)"
   else
-    warn "⚠️  Android预构建失败，但继续进行（Coze可能使用自己的构建流程）"
+    warn "⚠️  EAS CLI未安装，尝试使用npx..."
+  fi
+
+  # 检查app.config.ts
+  if [ -f "app.config.ts" ]; then
+    info "✅ Expo配置文件已找到 (app.config.ts)"
+  else
+    warn "⚠️  未找到app.config.ts"
   fi
 
   cd "$ROOT_DIR"
 else
-  warn "未找到client目录，跳过Android预构建"
+  warn "未找到client目录，跳过Android构建准备"
 fi
-info "==================== Android预构建完成！====================\n"
+info "==================== Android构建准备完成！====================\n"
+info "提示：Coze平台将使用EAS服务进行Android云端构建"
 
 info "下一步：执行 ./prod_run.sh 启动服务"
