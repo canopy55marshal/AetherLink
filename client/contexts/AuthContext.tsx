@@ -39,11 +39,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     loadAuthData();
 
-    // 添加超时机制，5秒后强制停止加载
+    // 添加超时机制，3秒后强制停止加载（缩短超时时间）
     const timeout = setTimeout(() => {
       setIsLoading(false);
-      console.warn('[AuthContext] Auth loading timeout (5s), forcing loading to false');
-    }, 5000);
+      console.warn('[AuthContext] Auth loading timeout (3s), forcing loading to false');
+    }, 3000);
 
     return () => clearTimeout(timeout);
   }, []);

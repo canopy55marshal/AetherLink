@@ -27,64 +27,61 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useSafeRouter();
   const segments = useSafeSegments();
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+  const [splashHidden, setSplashHidden] = useState(false);
 
   // 当应用准备好后，隐藏启动画面和加载屏幕
   useEffect(() => {
     const hideSplash = async () => {
       try {
-        // 策略1：等待导航就绪且有实际路由分段后，再隐藏启动画面
-        if (rootState?.key && segments.length > 0 && !isLoading) {
-          console.log('[AuthGuard] Conditions met, hiding splash screen...');
-          // 延迟200ms确保UI渲染完成
-          const timer = setTimeout(async () => {
-            try {
-              await SplashScreen.hideAsync();
-              console.log('[AuthGuard] Splash screen hidden successfully');
-              // 再延迟300ms隐藏加载屏幕，让过渡更平滑
-              setTimeout(() => {
-                setShowLoadingScreen(false);
-                console.log('[AuthGuard] Loading screen hidden');
-              }, 300);
-            } catch (error) {
-              console.warn('Failed to hide splash screen:', error);
-              // 即使出错也尝试隐藏
-              setShowLoadingScreen(false);
-            }
-          }, 200);
-          return () => clearTimeout(timer);
+        // 检查条件：导航就绪且认证加载完成
+        if (rootState?.key && !isLoading) {
+          console.log('[AuthGuard] Navigation ready and auth loaded, hiding splash...');
+
+          // 立即隐藏Splash Screen
+          await SplashScreen.hideAsync();
+          console.log('[AuthGuard] Splash screen hidden');
+          setSplashHidden(true);
+
+          // 100ms后隐藏加载屏幕（立即进入主界面）
+          setTimeout(() => {
+            setShowLoadingScreen(false);
+            console.log('[AuthGuard] Loading screen hidden');
+          }, 100);
+
+          return;
         }
       } catch (error) {
-        console.error('Error hiding splash screen:', error);
-        // 即使出错也尝试隐藏
+        console.error('Error in splash logic:', error);
+        // 出错时强制隐藏
         try {
           await SplashScreen.hideAsync();
         } catch (err) {
-          console.warn('Failed to hide splash screen on error:', err);
+          console.warn('Failed to hide splash on error:', err);
         }
+        setSplashHidden(true);
         setShowLoadingScreen(false);
       }
     };
 
     hideSplash();
 
-    // 策略2：超时保护 - 如果10秒后还没隐藏，强制隐藏
+    // 超时保护：3秒后强制隐藏（更激进）
     const forceHideTimer = setTimeout(async () => {
-      console.warn('[AuthGuard] Splash screen timeout (10s), force hiding...');
+      console.warn('[AuthGuard] Timeout (3s), force hiding everything...');
       try {
         await SplashScreen.hideAsync();
-        console.log('[AuthGuard] Splash screen force hidden');
       } catch (error) {
-        console.error('Failed to force hide splash screen:', error);
+        console.error('Failed to force hide splash:', error);
       }
-      // 强制隐藏加载屏幕
+      setSplashHidden(true);
       setShowLoadingScreen(false);
-      console.log('[AuthGuard] Loading screen force hidden');
-    }, 10000);
+      console.log('[AuthGuard] Force hide completed');
+    }, 3000);
 
     return () => {
       clearTimeout(forceHideTimer);
     };
-  }, [rootState?.key, segments.length, isLoading]);
+  }, [rootState?.key, isLoading]);
 
   useEffect(() => {
     console.log('[AuthGuard] Navigation effect - rootState:', !!rootState?.key, 'isLoading:', isLoading, 'isAuthenticated:', isAuthenticated, 'segments:', segments);

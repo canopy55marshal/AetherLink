@@ -138,11 +138,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 9999,
+    zIndex: 99999,
+    elevation: 9999,
   },
   content: {
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
   },
   pulseRing: {
     position: 'absolute',
