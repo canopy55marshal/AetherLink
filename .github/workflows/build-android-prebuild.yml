@@ -50,7 +50,9 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
         env:
-          EXPO_PUBLIC_BACKEND_BASE_URL: ${{ secrets.BACKEND_URL || 'https://your-coze-app.vercel.app' }}
+          # ⚠️ 重要：这里配置的是构建时的后端地址
+          # 如果你还没有部署后端服务，先暂时留空或使用测试地址
+          EXPO_PUBLIC_BACKEND_BASE_URL: ${{ secrets.BACKEND_URL || 'http://localhost:9091' }}
 
       - name: 📤 Upload APK artifact
         uses: actions/upload-artifact@v4

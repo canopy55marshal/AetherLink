@@ -4,6 +4,7 @@
  * 提供的 Hook：
  * - useSafeRouter: 代替 useRouter，包含所有路由方法，并对 push/replace/navigate/setParams 进行安全编码
  * - useSafeSearchParams: 代替 useLocalSearchParams，获取路由参数
+ * - useSafeSegments: 代替 useSegments，获取路由分段
  *
  * 解决的问题：
  * 1. URI 编解码不对称 - useLocalSearchParams 会自动解码，但 router.push 不会自动编码，
@@ -34,10 +35,13 @@
  *
  * // 接收端 - 使用 useSafeSearchParams 代替 useLocalSearchParams
  * const { id, uri } = useSafeSearchParams<{ id: number; uri: string }>();
+ *
+ * // 获取路由分段
+ * const segments = useSafeSegments();
  * ```
  */
 import { useMemo } from 'react';
-import { useRouter as useExpoRouter, useLocalSearchParams as useExpoParams } from 'expo-router';
+import { useRouter as useExpoRouter, useLocalSearchParams as useExpoParams, useSegments as useExpoSegments } from 'expo-router';
 import { Base64 } from 'js-base64';
 
 const PAYLOAD_KEY = '__safeRouterPayload__';
@@ -149,4 +153,12 @@ export function useSafeSearchParams<T = Record<string, unknown>>(): T {
   }, [rawParams]);
 
   return decodedParams;
+}
+
+/**
+ * 安全获取路由分段 Hook，代替 useSegments
+ * @returns 路由分段数组
+ */
+export function useSafeSegments(): string[] {
+  return useExpoSegments();
 }

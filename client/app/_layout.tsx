@@ -3,12 +3,17 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { LogBox } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
 import Toast from 'react-native-toast-message';
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ColorSchemeProvider } from '@/hooks/useColorScheme';
 import FloatingMessageIcon from '@/components/FloatingMessageIcon';
-import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
+import { useSafeRouter, useSafeSegments } from '@/hooks/useSafeRouter';
+import { useRootNavigationState } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+
+// 防止启动画面自动隐藏
+SplashScreen.preventAutoHideAsync();
 
 LogBox.ignoreLogs([
   "TurboModuleRegistry.getEnforcing(...): 'RNMapsAirModule' could not be found",
@@ -18,8 +23,26 @@ LogBox.ignoreLogs([
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const rootState = useRootNavigationState();
-  const router = useRouter();
-  const segments = useSegments();
+  const router = useSafeRouter();
+  const segments = useSafeSegments();
+
+  // 当应用准备好后，隐藏启动画面
+  useEffect(() => {
+    const hideSplash = async () => {
+      try {
+        // 等待认证加载完成
+        if (!isLoading) {
+          await SplashScreen.hideAsync();
+        }
+      } catch (error) {
+        console.error('Error hiding splash screen:', error);
+        // 即使出错也尝试隐藏
+        await SplashScreen.hideAsync();
+      }
+    };
+
+    hideSplash();
+  }, [isLoading]);
 
   useEffect(() => {
     if (!rootState?.key || isLoading) return;
