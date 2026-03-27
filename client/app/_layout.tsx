@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -11,6 +11,7 @@ import FloatingMessageIcon from '@/components/FloatingMessageIcon';
 import { useSafeRouter, useSafeSegments } from '@/hooks/useSafeRouter';
 import { useRootNavigationState } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import LoadingScreen from '@/components/LoadingScreen';
 
 // 防止启动画面自动隐藏
 SplashScreen.preventAutoHideAsync();
@@ -25,8 +26,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const rootState = useRootNavigationState();
   const router = useSafeRouter();
   const segments = useSafeSegments();
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
 
-  // 当应用准备好后，隐藏启动画面
+  // 当应用准备好后，隐藏启动画面和加载屏幕
   useEffect(() => {
     const hideSplash = async () => {
       try {
@@ -38,8 +40,15 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
             try {
               await SplashScreen.hideAsync();
               console.log('[AuthGuard] Splash screen hidden successfully');
+              // 再延迟300ms隐藏加载屏幕，让过渡更平滑
+              setTimeout(() => {
+                setShowLoadingScreen(false);
+                console.log('[AuthGuard] Loading screen hidden');
+              }, 300);
             } catch (error) {
               console.warn('Failed to hide splash screen:', error);
+              // 即使出错也尝试隐藏
+              setShowLoadingScreen(false);
             }
           }, 200);
           return () => clearTimeout(timer);
@@ -52,21 +61,25 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
         } catch (err) {
           console.warn('Failed to hide splash screen on error:', err);
         }
+        setShowLoadingScreen(false);
       }
     };
 
     hideSplash();
 
-    // 策略2：超时保护 - 如果8秒后还没隐藏，强制隐藏
+    // 策略2：超时保护 - 如果10秒后还没隐藏，强制隐藏
     const forceHideTimer = setTimeout(async () => {
-      console.warn('[AuthGuard] Splash screen timeout (8s), force hiding...');
+      console.warn('[AuthGuard] Splash screen timeout (10s), force hiding...');
       try {
         await SplashScreen.hideAsync();
         console.log('[AuthGuard] Splash screen force hidden');
       } catch (error) {
         console.error('Failed to force hide splash screen:', error);
       }
-    }, 8000);
+      // 强制隐藏加载屏幕
+      setShowLoadingScreen(false);
+      console.log('[AuthGuard] Loading screen force hidden');
+    }, 10000);
 
     return () => {
       clearTimeout(forceHideTimer);
@@ -91,7 +104,12 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [rootState?.key, isAuthenticated, isLoading, segments, router]);
 
-  return <>{children}</>;
+  return (
+    <>
+      {showLoadingScreen && <LoadingScreen />}
+      {children}
+    </>
+  );
 }
 
 export default function RootLayout() {
