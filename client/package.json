@@ -10,6 +10,7 @@
     "lint": "expo lint",
     "start": "expo start --web --clear",
     "build:web": "npx expo export",
+    "build:android": "eas build --platform android --profile preview",
     "test": "jest --watchAll"
   },
   "jest": {
@@ -78,6 +79,7 @@
     "chalk": "^4.1.2",
     "connect": "^3.7.0",
     "depcheck": "^1.4.7",
+    "eas-cli": "^18.4.0",
     "esbuild": "0.27.2",
     "eslint": "^9.39.2",
     "eslint-formatter-compact": "^9.0.1",
