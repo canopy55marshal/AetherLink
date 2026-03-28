@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
+  Alert,
 } from 'react-native';
 import { useSafeRouter, useSafeSearchParams } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
@@ -53,19 +55,38 @@ export default function TaskDetailScreen() {
   }, [id]);
 
   const fetchTaskDetail = async () => {
-    if (!id) return;
+    if (!id) {
+      Alert.alert('错误', '缺少任务ID');
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch(`${EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/tasks/${id}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
       const result = await response.json();
 
       if (result.error) {
         console.error('Error fetching task:', result.error);
-      } else {
+        Alert.alert('获取失败', result.error || '无法获取任务详情');
+        setTaskData(null);
+      } else if (result.data) {
         setTaskData(result.data);
+      } else {
+        console.warn('No data in response');
+        Alert.alert('提示', '暂无任务详情数据');
+        setTaskData(null);
       }
     } catch (error) {
       console.error('Fetch error:', error);
+      Alert.alert('网络错误', '无法连接到服务器，请检查网络连接');
+      setTaskData(null);
     } finally {
       setLoading(false);
     }
@@ -103,8 +124,35 @@ export default function TaskDetailScreen() {
   if (!taskData) {
     return (
       <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="dark">
+        {/* Header with Back Button */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <FontAwesome6 name="arrow-left" size={20} color={theme.textPrimary} />
+          </TouchableOpacity>
+          <ThemedText variant="h3" color={theme.textPrimary}>
+            任务详情
+          </ThemedText>
+        </View>
+
         <View style={styles.centerContainer}>
-          <ThemedText variant="body" color={theme.textSecondary}>任务未找到</ThemedText>
+          <FontAwesome6 name="file-circle-xmark" size={64} color={theme.textMuted} style={styles.errorIcon} />
+          <ThemedText variant="h3" color={theme.textSecondary} style={styles.errorTitle}>
+            任务未找到
+          </ThemedText>
+          <ThemedText variant="body" color={theme.textMuted} style={styles.errorMessage}>
+            无法加载任务详情数据，请稍后重试
+          </ThemedText>
+          <TouchableOpacity
+            style={[styles.retryButton, { backgroundColor: theme.primary }]}
+            onPress={() => {
+              setLoading(true);
+              fetchTaskDetail();
+            }}
+          >
+            <ThemedText variant="body" color="#FFFFFF" style={{ fontWeight: '600' }}>
+              重新加载
+            </ThemedText>
+          </TouchableOpacity>
         </View>
       </Screen>
     );
@@ -321,6 +369,3 @@ function getStepTypeColor(type: string): string {
       return '#6B7280';
   }
 }
-
-import { useMemo } from 'react';
-import { Image } from 'react-native';

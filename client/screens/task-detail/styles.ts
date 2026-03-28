@@ -14,6 +14,23 @@ export const createStyles = (theme: Theme) => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      padding: Spacing.xl,
+    },
+    errorIcon: {
+      marginBottom: Spacing.lg,
+    },
+    errorTitle: {
+      fontWeight: '600',
+      marginBottom: Spacing.sm,
+    },
+    errorMessage: {
+      textAlign: 'center',
+      marginBottom: Spacing.xl,
+    },
+    retryButton: {
+      paddingHorizontal: Spacing.xl,
+      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.lg,
     },
     header: {
       flexDirection: 'row',
@@ -25,6 +42,12 @@ export const createStyles = (theme: Theme) => {
     backButton: {
       marginRight: Spacing.md,
       padding: Spacing.sm,
+      backgroundColor: theme.backgroundTertiary,
+      borderRadius: BorderRadius.md,
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     heroSection: {
       marginBottom: -Spacing.lg,
