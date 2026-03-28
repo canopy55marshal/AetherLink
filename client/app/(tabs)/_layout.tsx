@@ -46,7 +46,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="knowledge"
         options={{
-          title: '认知馆',
+          title: '学搭',
           tabBarIcon: ({ color }) => (
             <FontAwesome6 name="book-open" size={22} color={color} />
           ),
@@ -55,7 +55,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ai-workshop"
         options={{
-          title: '数据制作',
+          title: '创搭',
           tabBarIcon: ({ color }) => (
             <FontAwesome6 name="cube" size={22} color={color} />
           ),
@@ -64,7 +64,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="pet"
         options={{
-          title: '爱宠',
+          title: '宠搭',
           tabBarIcon: ({ color }) => (
             <FontAwesome6 name="paw" size={22} color={color} />
           ),
@@ -73,7 +73,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="community"
         options={{
-          title: '社区',
+          title: '旅搭',
           tabBarIcon: ({ color }) => (
             <FontAwesome6 name="people-group" size={22} color={color} />
           ),
