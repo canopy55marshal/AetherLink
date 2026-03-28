@@ -12,6 +12,7 @@ import authRouter from './routes/auth';
 import storageRouter from './routes/storage';
 import messagesRouter from './routes/messages';
 import petsRouter from './routes/pets';
+import wikipediaRouter from './routes/wikipedia';
 import { initializeSocketServer } from './services/socket';
 
 const app = express();
@@ -59,6 +60,9 @@ app.use('/api/v1/messages', messagesRouter);
 
 // 宠物路由
 app.use('/api/v1/pets', petsRouter);
+
+// 维基百科路由
+app.use('/api/v1/wikipedia', wikipediaRouter);
 
 // 创建 HTTP 服务器
 const server = createServer(app);
